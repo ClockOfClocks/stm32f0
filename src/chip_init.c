@@ -24,10 +24,10 @@ void RCC_Init(void)
     // PLL x6: clock = 8 MHz * 6 = 48 MHz
     RCC->CFGR |= RCC_CFGR_PLLMUL6;
 
-    // AHB = SYSCLK / 1
+    // AHB (HCLK) = SYSCLK / 1
     RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
-    // APB = HCLK / 1
-    RCC->CFGR |= RCC_CFGR_PPRE_DIV2;
+    // APB (PCLK) = HCLK / 1
+    RCC->CFGR |= RCC_CFGR_PPRE_DIV1;
 
     // enable PLL and wait till PLL is ready
     RCC->CR |= RCC_CR_PLLON;
@@ -179,4 +179,48 @@ void ConfigureGPIO(void)
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
     GPIOB->MODER &= ~(GPIO_MODER_MODER8 | GPIO_MODER_MODER9);
     GPIOB->PUPDR |= GPIO_PUPDR_PUPDR8_0 | GPIO_PUPDR_PUPDR9_0;
+}
+
+void UART_Init(void)
+{
+    /* Enable the peripheral clock of GPIOB: tx (PB6), rx (PB7) */
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+    /* Enable the peripheral clock of GPIOA, dr (PA12) */
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+    /* GPIO configuration for USART1 signals */
+    /* (1) Select AF mode (10) on PB6 and PB7 */
+    /* (2) AF0 on PB6 and PB7 in AFRL for USART1 */
+    /* (3) Select Output PP mode on PA12 */
+    GPIOB->MODER = (GPIOB->MODER & ~(GPIO_MODER_MODER6 | GPIO_MODER_MODER7)) | (GPIO_MODER_MODER6_1 | GPIO_MODER_MODER7_1); /* (1) */
+    GPIOB->AFR[0] &= ~(GPIO_AFRL_AFRL6 | GPIO_AFRL_AFRL7);                                                                  /* (2) */
+    GPIOA->MODER = (GPIOA->MODER | GPIO_MODER_MODER12_0);                                                                   /* (3) */
+
+    // This will crash SWD connection
+    // GPIOA->MODER = (GPIOB->MODER & ~GPIO_MODER_MODER12) | GPIO_MODER_MODER12_1;
+    // GPIOA->AFR[1] |= 0x01 << GPIO_AFRH_AFRH4_Pos; /* (4), PA12 -> AF1 */
+
+    /* Enable the peripheral clock USART1 */
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+
+    /* Configure USART1 */
+    // USART1->BRR = 0x4E2; // 38.4kBps, 16 samples
+    USART1->BRR = 0xD0; // 230kBps, 16 samples
+    USART1->CR1 |= USART_CR1_TE; // enable TX
+    USART1->CR1 |= USART_CR1_RE; // enable RX
+    USART1->CR1 |= USART_CR1_UE; // enable usart
+
+    USART1->CR1 |= USART_CR1_RXNEIE; // enable interruption on receive
+
+    //RS-485 driver settings
+    USART1->CR3 |= USART_CR3_DEM;  //rs-485 driver enable mode
+    USART1->CR3 &= ~USART_CR3_DEP; //active high
+    USART1->CR1 |= USART_CR1_DEDT | USART_CR1_DEAT;
+
+    /* Configure IT */
+    /* (3) Set priority for USART1_IRQn */
+    /* (4) Enable USART1_IRQn */
+    NVIC_SetPriority(USART1_IRQn, 0); /* (3) */
+    NVIC_EnableIRQ(USART1_IRQn);      /* (4) */
+    //serialDisableTransfer();
 }
