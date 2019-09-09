@@ -163,6 +163,31 @@ void ConfigureTIM3PWM(void)
     NVIC_EnableIRQ(TIM3_IRQn);
 }
 
+void ConfigureTIM6(void)
+{
+    RCC->APB1ENR |= RCC_APB1ENR_TIM6EN;
+
+    TIM6->CR1 |= TIM_CR1_ARPE; //autorelode mode
+
+    TIM6->PSC = 17 - 1; // div for clock: F = SYSCLK / [PSC + 1]
+
+    // From modbus doc: http://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
+    // it is recommended to use a value of 750µs for the inter-character time-out (t1.5) 
+    // and a value of 1.750ms for inter-frame delay (t3.5).
+    // 0.00075s and 0.00175s respectively
+    // 1/(48000000/17/1000) = 0.00035416(6), so threshold count will be 2 and 4.94~=5
+    TIM6->ARR = 1000; // 48MHz / 60 (PSC) / 914 (ARR) = 875.273 Hz (~t1.5 and half of t3.5)
+    TIM6->CCR1 = 1000;  //ch1 1duty cycle
+
+    TIM6->DIER |= TIM_DIER_UIE; // Enable interruption
+
+    //start counting
+    TIM6->CR1 |= TIM_CR1_CEN;
+
+    NVIC_EnableIRQ(TIM6_IRQn); // enable interrupt
+    NVIC_SetPriority(TIM6_IRQn, 2);
+}
+
 void ConfigureGPIO(void)
 {
     // LED PC14
@@ -220,7 +245,8 @@ void UART_Init(void)
     /* Configure IT */
     /* (3) Set priority for USART1_IRQn */
     /* (4) Enable USART1_IRQn */
-    NVIC_SetPriority(USART1_IRQn, 0); /* (3) */
+    NVIC_SetPriority(USART1_IRQn, 1); /* (3) */
     NVIC_EnableIRQ(USART1_IRQn);      /* (4) */
-    //serialDisableTransfer();
+
+    serialDisableTransfer();
 }

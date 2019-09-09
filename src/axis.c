@@ -105,6 +105,9 @@ void extract_task(struct Axis *axis)
     }
     // Remove task from queue
     queue_pop(axis->queue);
+
+    // Clear memory
+    free(task);
   }
 }
 
@@ -168,17 +171,22 @@ void axis_loop(struct Axis *axis)
         {
           // initial position + position of magnet center
           axis->pointer_position = INITIAL_POINTER_POSITION + (axis->pointer_position - axis->calibration_pointer_position) / 2;
+
+          if(true){ // set home position to the right
+            // axis->pointer_position += (ONE_DEGREE_POINTER_DIFF * 45);
+          }
+
           axis->calibration_state = AXIS_CALIBRATION_FINISHED;
 
           // if no tasks in the queue, move to home position after calibratin finish
           if (queue_size(axis->queue) == 0)
           {
-            struct AxisTask task;
-            task.type = AXIS_TASK_TYPE_MOVE;
-            task.degree = 0;
-            task.speed = 10;
-            task.relative = false;
-            queue_push(axis->queue, &task.n);
+            struct AxisTask* task = malloc (sizeof (struct AxisTask));
+            task->type = AXIS_TASK_TYPE_MOVE;
+            task->degree = 0;
+            task->speed = 20;
+            task->relative = false;
+            queue_push(axis->queue, &task->n);
           }
           // pick next task
           axis->state = AXIS_STATUS_IDLE;
