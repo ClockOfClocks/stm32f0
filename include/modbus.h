@@ -3,7 +3,7 @@
 
 #include <stm32f0xx.h>
 
-#define MODBUS_SLAVE_ADDRESS 12
+#define MODBUS_SLAVE_ADDRESS 11
 
 #define OBJ_SZ 123 // Some kind of inner-protection
 #define MODBUS_BUFFER_SIZE 256

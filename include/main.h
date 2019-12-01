@@ -7,6 +7,7 @@
 #include "timing.h"
 #include "axis.h"
 #include "modbus.h"
+#include "adc.h"
 #include <stdlib.h>
 #include <stdio.h>
 

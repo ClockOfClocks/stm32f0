@@ -15,6 +15,7 @@ int main()
     ConfigureGPIO();
     UART_Init();
     ConfigureTIM6();
+    initADC();
 
     Axis_Init();
     Queue q1;
@@ -25,6 +26,35 @@ int main()
     ax2.queue = &q2;
     queue_init(ax2.queue);
 
+    
+    
+    // Test tasks	
+//   struct AxisTask task0;	
+//   task0.type = AXIS_TASK_TYPE_CALIBRATION;	
+//   queue_push(ax2.queue, &task0.n);	
+
+//   struct AxisTask task1;	
+//   task1.type = AXIS_TASK_TYPE_CALIBRATION;	
+//   queue_push(ax1.queue, &task1.n);	
+
+//  float testSpeed = 20;
+//  float testAngle = 90;
+//
+//  struct AxisTask task;
+//  task.type = AXIS_TASK_TYPE_MOVE;
+//  task.degree = testAngle;
+//  task.speed = testSpeed;
+//  task.relative = false;
+//  queue_push(ax1.queue, &task.n);
+//
+//  struct AxisTask task2;
+//  task2.type = AXIS_TASK_TYPE_MOVE;
+//  task2.degree = -testAngle;
+//  task2.speed = testSpeed;
+//  task2.relative = false;
+//  queue_push(ax2.queue, &task2.n);
+//
+    
     // Enable motor drive
     GPIOA->BSRR = GPIO_BSRR_BS_5;
     GPIOB->BSRR = GPIO_BSRR_BS_15;

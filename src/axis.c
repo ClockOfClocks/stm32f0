@@ -207,5 +207,6 @@ bool is_hall_sensor_active_1(void)
 
 bool is_hall_sensor_active_2(void)
 {
-  return (GPIOB->IDR & GPIO_IDR_9) != GPIO_IDR_9;
+  return ADC_array[1] > 3500;
+  //return (GPIOB->IDR & GPIO_IDR_9) != GPIO_IDR_9;
 }
