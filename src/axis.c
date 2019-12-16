@@ -6,6 +6,7 @@ int16_t sin_data[256] = // 256 values per 2pi, +\- 1024
 void Axis_Init(void)
 {
   // ax1
+  ax1.is_hour_axis = true;
   ax1.state = AXIS_STATUS_INIT;
   ax1.pointer_position = INITIAL_POINTER_POSITION;
   ax1.target_pointer_position = INITIAL_POINTER_POSITION;
@@ -19,6 +20,7 @@ void Axis_Init(void)
   ax1.is_hall_sensor_active = is_hall_sensor_active_1;
 
   // ax2
+  ax1.is_hour_axis = false;
   ax2.state = AXIS_STATUS_INIT;
   ax2.pointer_position = INITIAL_POINTER_POSITION;
   ax2.target_pointer_position = INITIAL_POINTER_POSITION;
@@ -152,9 +154,10 @@ void axis_loop(struct Axis *axis)
 
     if (AXIS_STATUS_CALIBRATION == axis->state)
     {
-      if (axis->is_hall_sensor_active())
+      bool searchState = axis->calibration_state == AXIS_CALIBRATION_SEARCH;
+      if (axis->is_hall_sensor_active(searchState))
       {
-        if (axis->calibration_state == AXIS_CALIBRATION_SEARCH)
+        if (searchState)
         {
           axis->calibration_pointer_position = axis->pointer_position;
           axis->calibration_state = AXIS_CALIBRATION_DETECTED;
@@ -200,13 +203,12 @@ void axis_loop(struct Axis *axis)
   }
 }
 
-bool is_hall_sensor_active_1(void)
+bool is_hall_sensor_active_1(bool enterState)
 {
-  return (GPIOB->IDR & GPIO_IDR_8) != GPIO_IDR_8;
+  return ADC_array[1] > (enterState ? 3500 : 3200);
 }
 
-bool is_hall_sensor_active_2(void)
+bool is_hall_sensor_active_2(bool enterState)
 {
-  return ADC_array[1] > 3500;
-  //return (GPIOB->IDR & GPIO_IDR_9) != GPIO_IDR_9;
+  return ADC_array[0] > (enterState ? 3300 : 3000);
 }

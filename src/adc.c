@@ -104,8 +104,8 @@ __INLINE void ConfigureADC(void)
     /* Configure NVIC for ADC */
     /* (7) Enable Interrupt on ADC */
     /* (8) Set priority for ADC */
-    NVIC_EnableIRQ(ADC1_COMP_IRQn);      /* (7) */
-    NVIC_SetPriority(ADC1_COMP_IRQn, 0); /* (8) */
+    //NVIC_EnableIRQ(ADC1_COMP_IRQn);      /* (7) */
+    //NVIC_SetPriority(ADC1_COMP_IRQn, 0); /* (8) */
 }
 
 /**
@@ -223,18 +223,16 @@ void DMA1_Channel1_IRQHandler(void)
   */
 void ADC1_COMP_IRQHandler(void)
 {
-  if ((ADC1->ISR & ADC_ISR_OVR) != 0)  /* Check OVR has triggered the IT */
-  {
-    GPIOC->BSRR = (1<<8); /* Switch on orange led to report a resume of the conversion  */
-    GPIOC->BSRR = (1<<(9+16)); /* Switch off green led to reportit is due to overrun  */
-    ADC1->ISR |= ADC_ISR_OVR; /* Clear the pending bit */
-    ADC1->CR |= ADC_CR_ADSTP; /* Stop the sequence conversion */
-    DMA1_Channel1->CCR &= (uint32_t)(~DMA_CCR_EN); /* Disable DMA Channel 1 to write in CNDTR*/
-    DMA1_Channel1->CNDTR = NUMBER_OF_ADC_CHANNEL; /* Reload the number of DMA tranfer to be performs on DMA channel 1 */
-    DMA1_Channel1->CCR |= DMA_CCR_EN; /* Enable again DMA Channel 1 */    
-  }
-  else
-  {
-    adc_error |= ERROR_UNEXPECTED_ADC_IT; /* Report unexpected ADC interrupt occurrence */
-  }
+  // if ((ADC1->ISR & ADC_ISR_OVR) != 0)  /* Check OVR has triggered the IT */
+  // {
+  //   ADC1->ISR |= ADC_ISR_OVR; /* Clear the pending bit */
+  //   ADC1->CR |= ADC_CR_ADSTP; /* Stop the sequence conversion */
+  //   DMA1_Channel1->CCR &= (uint32_t)(~DMA_CCR_EN); /* Disable DMA Channel 1 to write in CNDTR*/
+  //   DMA1_Channel1->CNDTR = NUMBER_OF_ADC_CHANNEL; /* Reload the number of DMA tranfer to be performs on DMA channel 1 */
+  //   DMA1_Channel1->CCR |= DMA_CCR_EN; /* Enable again DMA Channel 1 */    
+  // }
+  // else
+  // {
+  //   adc_error |= ERROR_UNEXPECTED_ADC_IT; /* Report unexpected ADC interrupt occurrence */
+  // }
 }

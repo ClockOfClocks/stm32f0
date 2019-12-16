@@ -33,6 +33,7 @@
 
 struct Axis
 {
+   bool is_hour_axis; 
    uint32_t pointer_position;
    uint8_t state;
    bool direction;                        // current direction of move, true – positive
@@ -48,7 +49,7 @@ struct Axis
    volatile uint32_t *cos_pwm_channel2;
 
    struct Queue *queue;
-   bool (*is_hall_sensor_active) (void);
+   bool (*is_hall_sensor_active) (bool);
 };
 
 struct AxisTask
@@ -68,5 +69,5 @@ void set_axis_speed(struct Axis *axis, float degreePerSecond);
 void move_axis_to(struct Axis *axis, float degree, bool relative);
 void extract_task(struct Axis *axis);
 void axis_loop(struct Axis *axis);
-bool is_hall_sensor_active_1 (void);
-bool is_hall_sensor_active_2 (void);
+bool is_hall_sensor_active_1 (bool);
+bool is_hall_sensor_active_2 (bool);
